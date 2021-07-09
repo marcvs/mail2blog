@@ -1,0 +1,42 @@
+[2021-07-09 14:45:00,457] WARNING - Warning: Could not read any config file from 
+    /etc/m2b.conf
+    /home/marcus/.config/.m2bconf
+    m2b.conf
+    /home/marcus/.config/m2b.conf
+[2021-07-09 14:45:00,457]   ERROR - Config does not appear to be for this program, but for'm2b'
+[2021-07-09 14:46:29,011] WARNING - Warning: Could not read any config file from 
+    /etc/m2b.conf
+    /home/marcus/.config/.m2bconf
+    m2b.conf
+    /home/marcus/.config/m2b.conf
+[2021-07-09 14:46:29,012]   ERROR - Config does not appear to be for this program, but for'm2b'
+[2021-07-09 14:47:12,219] WARNING - Warning: Could not read any config file from 
+    /etc/m2b.conf
+    /home/marcus/.config/.m2bconf
+    m2b.conf
+    /home/marcus/.config/m2b.conf
+[2021-07-09 14:47:12,219]   ERROR - SHURE
+[2021-07-09 14:48:01,875] WARNING - Warning: Could not read any config file from 
+    /etc/m2b.conf
+    /home/marcus/.config/.m2bconf
+    m2b.conf
+    /home/marcus/.config/m2b.conf
+[2021-07-09 14:48:01,875]   ERROR - SHURE
+[2021-07-09 14:48:07,172] WARNING - Warning: Could not read any config file from 
+    /etc/m2b.conf
+    /home/marcus/.config/.m2bconf
+    m2b.conf
+    /home/marcus/.config/m2b.conf
+[2021-07-09 14:48:07,173]   ERROR - SHURE
+[2021-07-09 14:48:22,713] WARNING - Warning: Could not read any config file from 
+    /etc/m2b.conf
+    /home/marcus/.config/.m2bconf
+    m2b.conf
+    /home/marcus/.config/m2b.conf
+[2021-07-09 14:48:22,713]   ERROR - SHURE
+[2021-07-09 14:49:33,087] WARNING - Warning: Could not read any config file from 
+    /etc/m2b.conf
+    /home/marcus/.config/.m2bconf
+    m2b.conf
+    /home/marcus/.config/m2b.conf
+[2021-07-09 14:49:33,087]   ERROR - SHURE
