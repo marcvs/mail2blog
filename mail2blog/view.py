@@ -109,7 +109,6 @@ class ArticleRenderer():
         res = subprocess.call(command, shell = True)
         if res != 0:
             logger.error(F"Error when generating the gallery: {res}")
-        print("Returned Value: ", res)
 
     def _add_gallery_url(self):
         gallery_output = CONFIG.get('locations', 'gallery_output')
