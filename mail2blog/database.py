@@ -14,6 +14,7 @@ import logging
 import sqlite3
 import time
 import email
+from urllib.parse import quote_plus
 from email.iterators import _structure
 from imaplib import IMAP4_SSL
 from datetime import datetime
@@ -109,8 +110,7 @@ class Blog_entry:
     def get_subject(self, replace_spaces=False):
         if not replace_spaces:
             return self.subject
-        from urllib.parse import quote_plus
-        return quote_plu(str(self.subject).replace(' ', '_'))
+        return quote_plus(str(self.subject).replace(' ', '_'))
 
     def store_in_db(self):
         '''store entry in db'''
@@ -150,6 +150,7 @@ class Blog_entry:
                                 author_last  = self.author.split(' ')[1],
                                 author_email = self.author_email, 
                                 link = F"{subject_no_spaces}-{self.message_id}.html")
+        logger.debug(F"subject_no_spaces: {subject_no_spaces}")
         return retval
 
 class Blog:
