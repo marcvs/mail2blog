@@ -137,7 +137,6 @@ class Blog_entry:
         return (cls(json['message_id'], json['email_from'], json['subject'], json['date']))
 
     def __str__(self):
-        # FIXME: return markdown formatted List Entry, potentially based on template
         template_file = CONFIG.get('templates', 'index')
         with open(template_file, 'r') as fh:
             template_data = fh.read()
@@ -148,7 +147,7 @@ class Blog_entry:
                                 author_first = self.author.split(' ')[0],
                                 author_last  = self.author.split(' ')[1],
                                 author_email = self.author_email, 
-                                link = F"{self.subject}-{self.message_id}")
+                                link = F"{self.subject}-{self.message_id}.html")
         return retval
 
 class Blog:
