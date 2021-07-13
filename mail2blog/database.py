@@ -78,7 +78,7 @@ class Blog_entry:
         return self.message_id
 
     def get_message(self):
-        logger.info(F"loading message {self.message_id}...")
+        logger.info(F"loading message {self.subject}...")
         if self.source == "db":
             msg = self.get_message_from_db()
         elif self.source == "imap":
@@ -109,7 +109,8 @@ class Blog_entry:
     def get_subject(self, replace_spaces=False):
         if not replace_spaces:
             return self.subject
-        return str(self.subject).replace(' ', '_')
+        from urllib.parse import quote_plus
+        return quote_plu(str(self.subject).replace(' ', '_'))
 
     def store_in_db(self):
         '''store entry in db'''
