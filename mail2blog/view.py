@@ -84,6 +84,10 @@ class ArticleRenderer():
         for ext in JPEG_EXTENSIONS:
             filename = filename.replace(ext, 'jpg')
         logger.info(F"image: {filename}")
+        actual_extension = filename.split('.')[-1]
+        if actual_extension.lower() == 'png':
+            logger.warning("PNG not yet supported by bic, skipping {filename}")
+            return
         with open(os.path.join(self.media_output_dir  + '/' + filename), 'wb') as fp:
             fp.write(part.get_payload(decode=True))
         self.media_part_found = True
