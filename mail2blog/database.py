@@ -16,6 +16,8 @@ import time
 import email
 from email.iterators import _structure
 from imaplib import IMAP4_SSL
+from datetime import datetime
+from jinja2 import Template
 
 from mail2blog import logsetup
 from mail2blog.imapconnector import ImapConnector
@@ -48,6 +50,10 @@ class Blog_entry:
         self.epoch      = epoch
         if epoch is None:
             self.epoch  = int(time.time())
+
+        self.date = datetime.fromtimestamp(epoch)
+        self.author = str(email_from).split('<')[0]
+        self.author_email = str(email_from).split('<')[1].replace('>','')
         
     # def initSqlTables(self, database):
     def initSqlTables(self):
@@ -72,6 +78,7 @@ class Blog_entry:
         return self.message_id
 
     def get_message(self):
+        logger.info(F"loading message {self.message_id}...")
         if self.source == "db":
             msg = self.get_message_from_db()
         elif self.source == "imap":
@@ -128,10 +135,20 @@ class Blog_entry:
     def from_json(cls, json):
         '''create new entry from json'''
         return (cls(json['message_id'], json['email_from'], json['subject'], json['date']))
+
     def __str__(self):
         # FIXME: return markdown formatted List Entry, potentially based on template
-        retval=''
-        retval += (F"{self.subject} - {self.message_id:10s}")
+        template_file = CONFIG.get('templates', 'index')
+        with open(template_file, 'r') as fh:
+            template_data = fh.read()
+        template = Template(template_data)
+        retval = template.render(date = self.date, 
+                                subject = self.subject,
+                                author = self.author,
+                                author_first = self.author.split(' ')[0],
+                                author_last  = self.author.split(' ')[1],
+                                author_email = self.author_email, 
+                                link = F"{self.subject}-{self.message_id}")
         return retval
 
 class Blog:
@@ -139,12 +156,13 @@ class Blog:
     def __init__(self):
         self.entries = []
         # self.read_entries_from_db()
-    def __str__(self):
-        lst = []
+    def generate_index(self):
+        '''render the index'''
+        rendered_blog_entries= []
         for entry in self.entries:
-            lst.append(entry.__str__())
+            rendered_blog_entries.append(entry.__str__())
 
-        return "Blog:\n" + "\n".join(lst)
+        return "\n".join(rendered_blog_entries)
 
     def read_entries_from_db(self):
         '''read entries from database'''
@@ -175,10 +193,13 @@ class Blog:
             for field in FIELDS:
                 dec_msg[field] = tools.email_decode(msg[field])
             dec_msg['message-id']=msg['message-id'].replace('<','').replace('>','')
-            print(F"{dec_msg['message-id']} | {dec_msg['from']} | {dec_msg['to']} |  {dec_msg['subject']}")
+            # print(F"{dec_msg['message-id']} | {dec_msg['from']} | {dec_msg['to']} |  {dec_msg['subject']}")
             # print(F"structure:\n  {_structure(msg)}")
+
+            date = tools.dateparser(msg['date'])
+            epoch = date.timestamp()
             self.entries.append(Blog_entry(message_id = dec_msg['message-id'],
                                            email_from = dec_msg['from'], 
                                            subject = dec_msg['subject'],
-                                           epoch=None,
+                                           epoch=epoch,
                                            source="imap"))
