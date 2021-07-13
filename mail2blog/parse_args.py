@@ -16,7 +16,9 @@ def parseOptions():
     '''Parse the commandline options'''
 
     folder_of_executable = os.path.split(sys.argv[0])[0]
-    basename = os.path.basename(sys.argv[0]).rstrip('.py')
+    # basename = os.path.basename(sys.argv[0]).rstrip('.py')
+    # print (F"basename: {basename}")
+    basename="mail2blog"
 
     config_dir  = os.environ['HOME']+F'/.config/{basename}'
     config_file = os.environ['HOME']+F'/.config/{basename}.conf'
@@ -31,7 +33,6 @@ def parseOptions():
     parser = argparse.ArgumentParser(description='''mail2blog''')
     parser.add_argument('--basename'        ,default=basename)
     parser.add_argument('--logfile'         ,default=log_file, help='logfile' )
-    parser.add_argument('--database'        ,default=db)
     parser.add_argument('--config',   '-c'  ,default=config_file)
     parser.add_argument('--port'            ,default=3888)
     # parser.add_argument('--loglevel'        ,default=os.environ.get("LOG", "WARNING").upper()

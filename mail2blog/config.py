@@ -19,7 +19,6 @@ def set_defaults():
     if args.logfile is not None:
         CONFIG.read_dict ({'main': {
             'basename'    :  args.basename,
-            'database'    :  args.database,
             'config'      :  args.config,
             'port'        :  args.port,
             'verbose'     :  args.verbose,
@@ -29,7 +28,6 @@ def set_defaults():
         CONFIG.read_dict ({'main': {
             'basename'    :  args.basename,
             'logfile'     :  args.logfile,
-            'database'    :  args.database,
             'config'      :  args.config,
             'port'        :  args.port,
             'loglevel'    :  args.loglevel,
