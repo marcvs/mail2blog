@@ -40,7 +40,7 @@ class ArticleRenderer():
 
         # If the html file is already there, we don't need to re-render:
         if os.path.exists(self.html_output_file):
-            logger.info(F"{self.html_output_file} already exists => skipping article")
+            logger.info(F"{self.subject} already exists => skipping article")
 
         else:
             self.msg          = blog_entry.get_message()
@@ -79,7 +79,7 @@ class ArticleRenderer():
     def image_renderer(self, part):
         tools.makepath(self.media_output_dir, 2)
         filename = part.get_filename()
-        logger.debug(F"image: {filename}")
+        logger.info(F"image: {filename}")
         with open(os.path.join(self.media_output_dir  + '/' + filename), 'wb') as fp:
             fp.write(part.get_payload(decode=True))
         self.media_part_found = True
