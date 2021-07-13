@@ -59,6 +59,7 @@ class ArticleRenderer():
     def write_output(self):
         '''render md to html and write output'''
         html_data = tools.render_pandoc_with_theme(self.markdown)
+        logger.debug(F"saving html to {self.html_output_file}")
         with open(self.html_output_file, 'w') as fp:
             fp.write(html_data)
 
@@ -75,11 +76,13 @@ class ArticleRenderer():
         prt = part.get_payload(decode=True)
         self.markdown = prt.decode('iso-8859-1')
         self.markdown = self.markdown.split('\n-- ')[0]
-
     def image_renderer(self, part):
+        JPEG_EXTENSIONS=['JPG', 'JPEG', 'Jpeg', 'jpeg']
         tools.makepath(self.media_output_dir, 2)
         temp = part.get_filename()
         filename = re.sub(r"[\s+/]", '-', temp)
+        for ext in JPEG_EXTENSIONS:
+            filename = filename.replace(ext, 'jpg')
         logger.info(F"image: {filename}")
         with open(os.path.join(self.media_output_dir  + '/' + filename), 'wb') as fp:
             fp.write(part.get_payload(decode=True))
