@@ -14,7 +14,6 @@ import logging
 import sys
 import os
 import mimetypes
-import pypandoc
 import subprocess
 
 from mail2blog import logsetup
@@ -37,6 +36,7 @@ class ArticleRenderer():
         self.html_output_file = os.path.join(blog_output_dir, F"{self.subject}-{self.message_id}.html")
         temp_output_dir       = CONFIG.get('locations', 'temp_output')
         self.media_output_dir = os.path.join(temp_output_dir, F"{self.subject}-{self.message_id}")
+        self.markdown         = ''
 
         # If the html file is already there, we don't need to re-render:
         if os.path.exists(self.html_output_file):
@@ -46,7 +46,6 @@ class ArticleRenderer():
             self.msg          = blog_entry.get_message()
 
             tools.makepath(blog_output_dir, 2)
-            tools.makepath(self.media_output_dir, 2)
 
             self.text = None
             self.media = []
@@ -54,6 +53,14 @@ class ArticleRenderer():
             self.walker()
             if self.media_part_found:
                 self._run_bic()
+                self._add_gallery_url()
+            self.write_output()
+
+    def write_output(self):
+        '''render md to html and write output'''
+        html_data = tools.render_pandoc_with_theme(self.markdown)
+        with open(self.html_output_file, 'w') as fp:
+            fp.write(html_data)
 
     def render(self, maintype, *args, **kwargs):
         if maintype == "text":
@@ -66,20 +73,11 @@ class ArticleRenderer():
 
     def text_renderer(self, part):
         prt = part.get_payload(decode=True)
-        inpt = prt.decode('iso-8859-1')
-        inpt = inpt.split('\n-- \n')[0]
-        style_file_name = CONFIG.get('themes', 'style_file', fallback=None) 
-        with open(style_file_name, 'r') as st:
-            style = st.read()
-
-        html_data = pypandoc.convert_text(style + inpt, 'html', format='md')
-
-        with open(self.html_output_file, 'w') as fp:
-            fp.write(html_data)
+        self.markdown = prt.decode('iso-8859-1')
+        self.markdown = self.markdown.split('\n-- ')[0]
 
     def image_renderer(self, part):
-        # self.media.append(part.get_payload(decode=True))
-
+        tools.makepath(self.media_output_dir, 2)
         filename = part.get_filename()
         logger.debug(F"image: {filename}")
         with open(os.path.join(self.media_output_dir  + '/' + filename), 'wb') as fp:
@@ -87,6 +85,7 @@ class ArticleRenderer():
         self.media_part_found = True
 
     def video_renderer(self, part):
+        tools.makepath(self.media_output_dir, 2)
         filename = part.get_filename()
         logger.debug(F"video: {filename} -- Ignored")
         self.image_renderer(part)
@@ -104,24 +103,35 @@ class ArticleRenderer():
         gallery_output = CONFIG.get('locations', 'gallery_output')
         tools.makepath(gallery_output)
 
+        logger.info(F"Generating gallery for {self.message_id}...")
         command = F'{bic} -i "{self.media_output_dir}" -n "{gallery_name}" -f -t any -r 0 -d /nordkapp/pix -o {gallery_output}> /dev/null 2>&1'
-        logger.debug(F"bic command: >>{command}<<")
+        logger.debug(F"gallery command: >>{command}<<")
         res = subprocess.call(command, shell = True)
+        if res != 0:
+            logger.error(F"Error when generating the gallery: {res}")
         print("Returned Value: ", res)
 
-        # FIXME: Copy / move output to ~/public_html/blogs/nordkapp/pix/subject
-        # Or point self.media_output_dir to that directory
+    def _add_gallery_url(self):
+        gallery_output = CONFIG.get('locations', 'gallery_output')
+        self.markdown += F"\n[Bilder]({gallery_output})"
 
 def generate_index():
     blog=Blog()
     blog.read_entries_from_imap()
-    # blog.read_entries_from_db()
-    print ("generating view:")
-    print(blog.__str__())
     # sys.exit(0)
     for entry in blog.entries:
-        # FIXME: check if output is already created
         renderer=ArticleRenderer(entry)
+
+    blog_index_md = blog.generate_index()
+
+    blog_index_html = tools.render_pandoc_with_theme(blog_index_md)
+    # FIXME: index.html
+    index_file_name = CONFIG.get('locations', 'blog_output') + "/test.html"
+
+    tools.makepath(CONFIG.get('locations', 'blog_output'))
+    with open(index_file_name, 'w') as fh:
+        fh.write(blog_index_html)
+
 
 if __name__ == '__main__':
     # sys.exit(main())
