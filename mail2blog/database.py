@@ -142,12 +142,12 @@ class Blog_entry:
             template_data = fh.read()
         template = Template(template_data)
         retval = template.render(date = self.date, 
-                                subject = self.subject,
+                                subject = self.get_subject,
                                 author = self.author,
                                 author_first = self.author.split(' ')[0],
                                 author_last  = self.author.split(' ')[1],
                                 author_email = self.author_email, 
-                                link = F"{self.subject}-{self.message_id}.html")
+                                link = F"{self.get_subject(replace_spaces=True)}-{self.message_id}.html")
         return retval
 
 class Blog:
