@@ -78,7 +78,7 @@ class ArticleRenderer():
 
     def image_renderer(self, part):
         tools.makepath(self.media_output_dir, 2)
-        filename = part.get_filename()
+        filename = part.get_filename().replace(' ', '_').replace('/','_')
         logger.info(F"image: {filename}")
         with open(os.path.join(self.media_output_dir  + '/' + filename), 'wb') as fp:
             fp.write(part.get_payload(decode=True))
@@ -86,7 +86,7 @@ class ArticleRenderer():
 
     def video_renderer(self, part):
         tools.makepath(self.media_output_dir, 2)
-        filename = part.get_filename()
+        filename = part.get_filename().replace(' ', '_').replace('/','_')
         logger.debug(F"video: {filename} -- Ignored")
         self.image_renderer(part)
         self.media_part_found = True
