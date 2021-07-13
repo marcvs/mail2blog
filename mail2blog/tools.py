@@ -11,6 +11,10 @@
 
 import os
 import email
+from datetime import datetime
+import pypandoc
+
+from mail2blog.config import CONFIG
 
 def makepath(directory, depth=3):
     basepath = '/'.join(directory.split('/')[0:-depth])
@@ -32,3 +36,19 @@ def email_decode(value):
     '''Decode email encoding'''
     return email.header.make_header(email.header.decode_header(value))
 
+def dateparser(text):
+    for fmt in ('%a, %d %b %Y %H:%M:%S %z', '%m/%d/%y %H:%M', '%m/%d/%Y %H:%M', '%Y-%m-%dT%H:%M:%S', '%Y-%m-%d %H:%M:%S'):
+        try:
+            return datetime.strptime(text, fmt)
+        except ValueError:
+            pass
+    raise ValueError(F'no valid date format found: >>{text}<<')
+
+# >>Tue, 13 Jul 2021 10:52:08 +0200<<
+def render_pandoc_with_theme(inpt):
+    style_file_name = CONFIG.get('themes', 'style_file', fallback=None) 
+    with open(style_file_name, 'r') as st:
+        style = st.read()
+
+    html_data = pypandoc.convert_text(style + inpt, 'html', format='md')
+    return html_data
