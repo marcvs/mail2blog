@@ -141,13 +141,16 @@ class Blog_entry:
         with open(template_file, 'r') as fh:
             template_data = fh.read()
         template = Template(template_data)
+        subject_no_spaces = self.get_subject(replace_spaces=True)
         retval = template.render(date = self.date, 
                                 subject = self.get_subject,
                                 author = self.author,
                                 author_first = self.author.split(' ')[0],
                                 author_last  = self.author.split(' ')[1],
                                 author_email = self.author_email, 
-                                link = F"{self.get_subject(replace_spaces=True)}-{self.message_id}.html")
+                                link = F"{subject_no_spaces}-{self.message_id}.html")
+        logger.info(F"sub: {self.subject}")
+        logger.info(F"sub: {subject_no_spacess}")
         return retval
 
 class Blog:
