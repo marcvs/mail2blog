@@ -99,20 +99,22 @@ class ArticleRenderer():
     def _run_bic(self):
         bic = CONFIG.get('tools', 'bic') 
         # Works for ~marcus/public_html
-        gallery_name = self.blog_entry.get_subject(replace_spaces=True)
         gallery_output = CONFIG.get('locations', 'gallery_output')
+        gallery_link_base = CONFIG.get('locations', 'gallery_link_base') 
+        gallery_name = self.blog_entry.get_subject(replace_spaces=True)
         tools.makepath(gallery_output)
 
         logger.info(F"Generating gallery for {self.message_id}...")
-        command = F'{bic} -i "{self.media_output_dir}" -n "{gallery_name}" -f -t any -r 0 -d /nordkapp/pix -o {gallery_output}> /dev/null 2>&1'
+        command = F'{bic} -i "{self.media_output_dir}" -n "{gallery_name}" -f -t any -r 0 -d {gallery_link_base} -o {gallery_output}> /dev/null 2>&1'
         logger.debug(F"gallery command: >>{command}<<")
         res = subprocess.call(command, shell = True)
         if res != 0:
             logger.error(F"Error when generating the gallery: {res}")
 
     def _add_gallery_url(self):
-        gallery_output = CONFIG.get('locations', 'gallery_output')
-        self.markdown += F"\n[Bilder]({gallery_output})"
+        gallery_link_base = CONFIG.get('locations', 'gallery_link_base') 
+        gallery_name = self.blog_entry.get_subject(replace_spaces=True)
+        self.markdown += F"\n[Bilder]({gallery_link_base}/{gallery_name})"
 
 def generate_index():
     blog=Blog()
