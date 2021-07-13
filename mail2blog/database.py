@@ -143,14 +143,14 @@ class Blog_entry:
         template = Template(template_data)
         subject_no_spaces = self.get_subject(replace_spaces=True)
         retval = template.render(date = self.date, 
-                                subject = self.get_subject,
+                                subject = self.subject,
                                 author = self.author,
                                 author_first = self.author.split(' ')[0],
                                 author_last  = self.author.split(' ')[1],
                                 author_email = self.author_email, 
                                 link = F"{subject_no_spaces}-{self.message_id}.html")
         logger.info(F"sub: {self.subject}")
-        logger.info(F"sub: {subject_no_spacess}")
+        logger.info(F"sub: {subject_no_spaces}")
         return retval
 
 class Blog:
