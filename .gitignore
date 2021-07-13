@@ -1,3 +1,11 @@
-*swp
 AUTHORS
+Changelog
+delme/
+build/
+dist/
+samples/
 ChangeLog
+mail2blog.conf
+*__pycache__
+*egg-info
+*swp
