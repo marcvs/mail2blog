@@ -149,8 +149,6 @@ class Blog_entry:
                                 author_last  = self.author.split(' ')[1],
                                 author_email = self.author_email, 
                                 link = F"{subject_no_spaces}-{self.message_id}.html")
-        logger.info(F"sub: {self.subject}")
-        logger.info(F"sub: {subject_no_spaces}")
         return retval
 
 class Blog:
