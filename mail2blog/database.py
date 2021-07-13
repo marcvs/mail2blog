@@ -112,6 +112,7 @@ class Blog_entry:
         if not replace_spaces:
             return self.subject
         s = re.sub(r"[^\w\s]", '', str(self.subject))
+        s = re.sub(r"[\s+/-]", '_', s)
         return s
 
     def store_in_db(self):
@@ -190,7 +191,7 @@ class Blog:
     def read_entries_from_imap(self):
         '''read entries from database'''
         msg_list = imap.get_message_list()
-        for msg in msg_list:
+        for msg in reversed(msg_list):
             # Decode as much as possible
             FIELDS = ['from', 'to', 'subject', 'date', 'Message-ID', 'Return-Path', 'Content-Type']
             dec_msg = {}
