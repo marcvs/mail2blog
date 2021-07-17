@@ -137,7 +137,7 @@ def generate_index():
 
     blog_index_html = tools.render_pandoc_with_theme(blog_index_md)
     # FIXME: index.html
-    index_file_name = CONFIG.get('locations', 'blog_output') + "/test.html"
+    index_file_name = CONFIG.get('locations', 'blog_output') + "/index.html"
 
     tools.makepath(CONFIG.get('locations', 'blog_output'))
     with open(index_file_name, 'w') as fh:
