@@ -16,10 +16,14 @@ import os
 import re
 import subprocess
 
-from mail2blog import logsetup
-from mail2blog import tools 
-from mail2blog.config import CONFIG
-from mail2blog.database import Blog_entry, Blog
+# from mail2blog import logsetup
+# from mail2blog import tools
+# from mail2blog.config import CONFIG
+# from mail2blog.database import Blog_entry, Blog
+from . import logsetup
+from . import tools 
+from .config import CONFIG
+from .database import Blog_entry, Blog
 
 logger = logging.getLogger(__name__)
 
