@@ -62,6 +62,7 @@ class ArticleRenderer():
         logger.debug(F"saving html to {self.html_output_file}")
         with open(self.html_output_file, 'w') as fp:
             fp.write(html_data)
+        os.chmod(self.html_output_file, 0o644)
 
     def render(self, maintype, *args, **kwargs):
         if maintype == "text":
