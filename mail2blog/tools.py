@@ -46,12 +46,13 @@ def dateparser(text):
     raise ValueError(F'no valid date format found: >>{text}<<')
 
 # >>Tue, 13 Jul 2021 10:52:08 +0200<<
-def render_pandoc_with_theme(inpt):
+def render_pandoc_with_theme(inpt, title="Title"):
     style_file_name = CONFIG.get('themes', 'style_file', fallback=None) 
     with open(style_file_name, 'r') as st:
         style = st.read()
 
     pandoc_args = ['-s']
+    header = F'title: {title}\n---\n'
 
     html_data = pypandoc.convert_text(style + inpt, 'html', format='md', extra_args=pandoc_args)
     return html_data
