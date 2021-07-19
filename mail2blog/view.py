@@ -60,7 +60,7 @@ class ArticleRenderer():
             self.media = []
 
             self.walker()
-            if self.media_part_found and args.nopix is True:
+            if self.media_part_found:
                 self._run_bic()
                 self._add_gallery_url()
             self.write_output()
@@ -103,9 +103,9 @@ class ArticleRenderer():
     def render(self, maintype, *myargs, **mykwargs):
         if maintype == "text":
             return(self.text_renderer(*myargs, **mykwargs))
-        if maintype == "image" and not args.nopix:
+        if maintype == "image":
             return(self.image_renderer(*myargs, **mykwargs))
-        if maintype == "video" and not args.nopix:
+        if maintype == "video":
             return(self.video_renderer(*myargs, **mykwargs))
         return None
 
