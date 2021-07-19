@@ -40,10 +40,10 @@ def parseOptions():
     parser.add_argument('--loglevel'        ,default=os.environ.get("LOG", None)
                                             ,help='Debugging Level')
 
-    parser.add_argument('--debug',    '-d'  ,default=False, action="store_true"
-                                            ,help='Do Debug')
-    parser.add_argument('--verbose',  '-v'  ,default=False, action="store_true"
-                                            ,help='Verbosity')
+    parser.add_argument('--debug',    '-d'  ,default=False, action="store_true")
+    parser.add_argument('--verbose',  '-v'  ,default=False, action="store_true")
+    parser.add_argument('--nopix',           default=False, action="store_true")
+    parser.add_argument('--force',    '-f',  default=False, action="store_true")
     # parser.add_argument(dest='target_file'   ,default=None,
     #         nargs='*', help='Just an example')
 
