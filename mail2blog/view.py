@@ -38,6 +38,8 @@ class ArticleRenderer():
         self.media_output_dir = os.path.join(temp_output_dir, F"{self.subject}-{self.message_id}")
         self.markdown         = ''
         self.gallery_name     = self.blog_entry.get_subject(replace_spaces=True) + '-' + self.blog_entry.get_message_id()
+        self.gallery_icon     = None
+        self.gallery_icon_basename = None
 
         # If the html file is already there, we don't need to re-render:
         if os.path.exists(self.html_output_file):
@@ -93,6 +95,8 @@ class ArticleRenderer():
         with open(os.path.join(self.media_output_dir  + '/' + filename), 'wb') as fp:
             fp.write(part.get_payload(decode=True))
         self.media_part_found = True
+        self.gallery_icon_basename = os.path.basename(filename)
+        logger.debug(F" gallery_icon_basename: {self.gallery_icon_basename }") 
 
     def video_renderer(self, part):
         tools.makepath(self.media_output_dir, 2)
@@ -120,10 +124,14 @@ class ArticleRenderer():
         res = subprocess.call(command, shell = True)
         if res != 0:
             logger.error(F"Error when generating the gallery: {res}")
+        self.gallery_icon = os.path.join(gallery_output, self.gallery_icon_basename)
 
     def _add_gallery_url(self):
+        # FIXME: move this to template
         gallery_link_base = CONFIG.get('locations', 'gallery_link_base') 
         self.markdown += F"\n[Bilder]({gallery_link_base}/{self.gallery_name})"
+        icon_url = F"{gallery_link_base}/{self.gallery_name}"
+        self.markdown +="[![icon]({icon_url})]({gallery_link_base}/{self.gallery_name})"
 
 def generate_index():
     blog=Blog()
