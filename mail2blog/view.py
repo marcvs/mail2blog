@@ -129,10 +129,9 @@ class ArticleRenderer():
     def _add_gallery_url(self):
         # FIXME: move this to template
         gallery_link_base = CONFIG.get('locations', 'gallery_link_base') 
-        self.markdown += F"\n[Bilder]({gallery_link_base}/{self.gallery_name})"
-        icon_url = F"{gallery_link_base}/{self.gallery_name}"
-        self.markdown +="[![icon]({icon_url})]({gallery_link_base}/{self.gallery_name})"
-
+        # self.markdown += F"\n[Bilder]({gallery_link_base}/{self.gallery_name})"
+        icon_url = F"{gallery_link_base}/{self.gallery_name}/gallery/thumbs/{self.gallery_icon_basename}"
+        self.markdown += F"[![icon]({icon_url})]({gallery_link_base}/{self.gallery_name})"
 def generate_index():
     blog=Blog()
     blog.read_entries_from_imap()
