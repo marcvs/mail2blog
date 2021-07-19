@@ -111,7 +111,7 @@ class ArticleRenderer():
         # Works for ~marcus/public_html
         gallery_output = CONFIG.get('locations', 'gallery_output')
         gallery_link_base = CONFIG.get('locations', 'gallery_link_base') 
-        gallery_name = self.blog_entry.get_subject(replace_spaces=True)
+        gallery_name = self.blog_entry.get_subject(replace_spaces=True) + '-' + self.blog_entry.get_message_id()
         tools.makepath(gallery_output)
 
         logger.info(F"Generating gallery for {self.message_id}...")
