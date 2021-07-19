@@ -37,6 +37,7 @@ class ArticleRenderer():
         temp_output_dir       = CONFIG.get('locations', 'temp_output')
         self.media_output_dir = os.path.join(temp_output_dir, F"{self.subject}-{self.message_id}")
         self.markdown         = ''
+        self.gallery_name     = self.blog_entry.get_subject(replace_spaces=True) + '-' + self.blog_entry.get_message_id()
 
         # If the html file is already there, we don't need to re-render:
         if os.path.exists(self.html_output_file):
@@ -111,11 +112,10 @@ class ArticleRenderer():
         # Works for ~marcus/public_html
         gallery_output = CONFIG.get('locations', 'gallery_output')
         gallery_link_base = CONFIG.get('locations', 'gallery_link_base') 
-        gallery_name = self.blog_entry.get_subject(replace_spaces=True) + '-' + self.blog_entry.get_message_id()
         tools.makepath(gallery_output)
 
         logger.info(F"Generating gallery for {self.message_id}...")
-        command = F'{bic} -i "{self.media_output_dir}" -n "{gallery_name}" -f -t any -r 0 -d {gallery_link_base} -o {gallery_output}> /dev/null 2>&1'
+        command = F'{bic} -i "{self.media_output_dir}" -n "{self.gallery_name}" -f -t any -r 0 -d {gallery_link_base} -o {gallery_output}> /dev/null 2>&1'
         logger.debug(F"gallery command: >>{command}<<")
         res = subprocess.call(command, shell = True)
         if res != 0:
@@ -123,8 +123,7 @@ class ArticleRenderer():
 
     def _add_gallery_url(self):
         gallery_link_base = CONFIG.get('locations', 'gallery_link_base') 
-        gallery_name = self.blog_entry.get_subject(replace_spaces=True)
-        self.markdown += F"\n[Bilder]({gallery_link_base}/{gallery_name})"
+        self.markdown += F"\n[Bilder]({gallery_link_base}/{self.gallery_name})"
 
 def generate_index():
     blog=Blog()
