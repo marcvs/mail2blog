@@ -13,6 +13,7 @@ import os
 import email
 from datetime import datetime
 import pypandoc
+from html.entities import codepoint2name
 
 from mail2blog.config import CONFIG
 
@@ -50,5 +51,17 @@ def render_pandoc_with_theme(inpt):
     with open(style_file_name, 'r') as st:
         style = st.read()
 
-    html_data = pypandoc.convert_text(style + inpt, 'html', format='md')
+    pandoc_args = ['-s']
+
+    html_data = pypandoc.convert_text(style + inpt, 'html', format='md', extra_args=pandoc_args)
     return html_data
+
+def htmlescape(text):
+    '''escape html characters'''
+    d = dict((chr(code), u'&%s;' % name) for code,name in codepoint2name.items() if code!=38) # exclude "&"    
+    if u"&" in text:
+        text = text.replace(u"&", u"&amp;")
+    for key, value in d.items():
+        if key in text:
+            text = text.replace(key, value)
+    return text
