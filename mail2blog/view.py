@@ -151,6 +151,7 @@ class ArticleRenderer():
         gallery_output = CONFIG.get('locations', 'gallery_output')
         gallery_link_base = CONFIG.get('locations', 'gallery_link_base') 
         tools.makepath(gallery_output)
+        os.umask(0o022)
 
         logger.info(F"Generating gallery for {self.message_id}...")
         command = F'{bic} -i "{self.media_output_dir}" -n "{self.gallery_name}" -f -t any -r 0 -d {gallery_link_base} -o {gallery_output}> /dev/null 2>&1'
