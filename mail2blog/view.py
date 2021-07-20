@@ -121,6 +121,14 @@ class ArticleRenderer():
         # FIXME: try to find encoding from email
         self.markdown = prt.decode('iso-8859-1')
         self.markdown = self.markdown.split('\n-- ')[0]
+        try:
+            self.meta = self.markdown.split('\n-- ')[0]
+            for line in self.meta.split('\n'):
+                logger.debug(F'  metadata: {line}')
+        except Exception as e:
+            logger.error(F"exception when trying to get metadata: {e}")
+
+
 
     def image_renderer(self, part):
         JPEG_EXTENSIONS=['JPG', 'JPEG', 'Jpeg', 'jpeg']
