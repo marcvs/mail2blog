@@ -111,6 +111,14 @@ class ArticleRenderer():
 
     def text_renderer(self, part):
         prt = part.get_payload(decode=True)
+        try:
+            maintype = part.get_content_maintype
+            logger.info(F"content_maintype: {maintype}")
+            subtype = part.get_content_subtype
+            logger.info(F"content_subtype: {subtype}")
+        except Exception:
+            pass
+        # FIXME: try to find encoding from email
         self.markdown = prt.decode('iso-8859-1')
         self.markdown = self.markdown.split('\n-- ')[0]
 
