@@ -112,9 +112,9 @@ class ArticleRenderer():
     def text_renderer(self, part):
         prt = part.get_payload(decode=True)
         try:
-            maintype = part.get_content_maintype
+            maintype = part.get_content_maintype()
             logger.info(F"content_maintype: {maintype}")
-            subtype = part.get_content_subtype
+            subtype = part.get_content_subtype()
             logger.info(F"content_subtype: {subtype}")
         except Exception:
             pass
@@ -122,7 +122,7 @@ class ArticleRenderer():
         self.markdown = prt.decode('iso-8859-1')
         self.markdown = self.markdown.split('\n-- ')[0]
         try:
-            self.meta = self.markdown.split('\n-- ')[0]
+            self.meta = self.markdown.split('\n-- ')[1]
             for line in self.meta.split('\n'):
                 logger.debug(F'  metadata: {line}')
         except Exception as e:
