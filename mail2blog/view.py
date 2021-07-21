@@ -112,6 +112,9 @@ class ArticleRenderer():
     def text_renderer(self, part):
         prt = part.get_payload(decode=True)
         try:
+            # [2021-07-20 22:30:25,917] { ...il2blog/database.py:83 }    INFO - loading message delme...
+            # [2021-07-20 22:30:26,165] { ..../mail2blog/view.py:116}    INFO - content_maintype: text
+            # [2021-07-20 22:30:26,165] { ..../mail2blog/view.py:118}    INFO - content_subtype: plain
             maintype = part.get_content_maintype()
             logger.info(F"content_maintype: {maintype}")
             subtype = part.get_content_subtype()
@@ -123,6 +126,7 @@ class ArticleRenderer():
         self.markdown = self.markdown.split('\n-- ')[0]
         try:
             self.meta = self.markdown.split('\n-- ')[1]
+            # [2021-07-20 22:30:26,165] { ..../mail2blog/view.py:129}   ERROR - exception when trying to get metadata: list index out of range
             for line in self.meta.split('\n'):
                 logger.debug(F'  metadata: {line}')
         except Exception as e:
