@@ -188,9 +188,12 @@ class Blog:
         conn.close()
 
 
-    def read_entries_from_imap(self):
+    def read_entries_from_imap(self, index=None, list_messages=False):
         '''read entries from database'''
         msg_list = imap.get_message_list()
+        if index is not None:
+            msg_list = [msg_list[index]]
+
         for msg in reversed(msg_list):
             # Decode as much as possible
             FIELDS = ['from', 'to', 'subject', 'date', 'Message-ID', 'Return-Path', 'Content-Type']
@@ -198,8 +201,9 @@ class Blog:
             for field in FIELDS:
                 dec_msg[field] = tools.email_decode(msg[field])
             dec_msg['message-id']=msg['message-id'].replace('<','').replace('>','')
-            # print(F"{dec_msg['message-id']} | {dec_msg['from']} | {dec_msg['to']} |  {dec_msg['subject']}")
-            # print(F"structure:\n  {_structure(msg)}")
+            if list_messages:
+                print(F"{dec_msg['message-id']} | {dec_msg['from']} | {dec_msg['to']} |  {dec_msg['subject']}")
+                # print(F"structure:\n  {_structure(msg)}")
 
             date = tools.dateparser(msg['date'])
             epoch = date.timestamp()
