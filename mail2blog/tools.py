@@ -66,7 +66,7 @@ def render_pandoc_with_theme(inpt, title="Title", with_map=False, geolocation=Fa
             </article>
 
             <script>
-                var mymap = L.map('mapid').setView([63.23, 9.49], 4);
+                var mymap = L.map('mapid').setView([67.00, 9.49], 4);
                 L.tileLayer('https://api.mapbox.com/styles/v1/{{id}}/tiles/{{z}}/{{x}}/{{y}}?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {{
                     maxZoom: 18,
                     attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, ' +
@@ -83,7 +83,7 @@ def render_pandoc_with_theme(inpt, title="Title", with_map=False, geolocation=Fa
                 color: 'red',
                 fillColor: '#f03',
                 fillOpacity: 0.5,
-                radius: 500000
+                radius: 100
             }}).addTo(mymap);
             <!--map marker end-->
             </script>'''
