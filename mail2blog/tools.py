@@ -87,6 +87,7 @@ def render_pandoc_with_theme(inpt, title="Title", with_map=False, geolocation=Fa
             }}).addTo(mymap);
             <!--map marker end-->
             </script>'''
+        logger.debug(F"trying to write to {body_after_include_file}")
         with open(body_after_include_file, 'w') as tf:
             tf.write(geo_data)
             logger.debug(F"wrote to {body_after_include_file}")
