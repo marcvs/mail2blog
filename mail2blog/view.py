@@ -32,6 +32,8 @@ class ArticleRenderer():
         self.message_id       = blog_entry.get_message_id()
         self.subject          = blog_entry.get_subject(replace_spaces=True)
         self.media_part_found = False
+        self.location      = None
+        self.gpx_data         = None
 
         # Define locations
         blog_output_dir       = CONFIG.get('locations', 'blog_output')
@@ -93,7 +95,11 @@ class ArticleRenderer():
                                 content = self.markdown,
                                 link = F"{subject_no_spaces}-{self.message_id}.html")
 
-        html_data = tools.render_pandoc_with_theme(markdown_data, title=subject)
+        # if self.gpx_data:
+        if self.location:
+            html_data = tools.render_pandoc_with_theme(markdown_data, title=subject, with_geolocation=True)
+        else:
+            html_data = tools.render_pandoc_with_theme(markdown_data, title=subject)
 
         logger.debug(F"saving html to {self.html_output_file}")
         with open(self.html_output_file, 'w') as fp:
@@ -110,7 +116,7 @@ class ArticleRenderer():
         return None
 
     def text_renderer(self, part):
-        prt = part.get_payload(decode=True)
+        payload = part.get_payload(decode=True)
         try:
             # [2021-07-20 22:30:25,917] { ...il2blog/database.py:83 }    INFO - loading message delme...
             # [2021-07-20 22:30:26,165] { ..../mail2blog/view.py:116}    INFO - content_maintype: text
@@ -121,17 +127,41 @@ class ArticleRenderer():
             logger.info(F"content_subtype: {subtype}")
         except Exception:
             pass
-        # FIXME: try to find encoding from email
-        self.markdown = prt.decode('iso-8859-1')
-        self.markdown = self.markdown.split('\n-- ')[0]
-        try:
-            self.meta = self.markdown.split('\n-- ')[1]
-            # [2021-07-20 22:30:26,165] { ..../mail2blog/view.py:129}   ERROR - exception when trying to get metadata: list index out of range
-            for line in self.meta.split('\n'):
-                logger.debug(F'  metadata: {line}')
-        except Exception as e:
-            logger.error(F"exception when trying to get metadata: {e}")
 
+        # Handle gpx data:
+        filename = part.get_filename()
+        logger.debug(F"filename: {filename}")
+        if filename is not None:
+            extension = os.path.splitext(filename)[1] 
+            logger.debug(F"extension: {extension}")
+            if extension == ".gpx":
+                self.gpx_data = payload.decode('iso-8859-1')
+                logger.debug("fine; returning none")
+                return None
+        # FIXME: try to find encoding from email
+        self.markdown = payload.decode('iso-8859-1')
+
+        ## try to split off a potential header
+        msg_body_parts = self.markdown.split('\n---')
+        logger.debug(F"   len msg_body_parts: {len(msg_body_parts)}")
+        self.markdown = msg_body_parts[-1]
+        if len (msg_body_parts) > 1: # we have some kind of header
+            ## copy the header into the local class
+            msg_internal_header = msg_body_parts[0]
+            parsed_header = tools.parse_internal_header(msg_internal_header)
+            supported_metadata = ['location', 'title', 'author']
+            for metadata_item in supported_metadata:
+                try:
+                    setattr(self, metadata_item, parsed_header['location'])
+                except KeyError:
+                    pass
+
+        ## Cut off footer
+        try:
+            self.markdown = self.markdown.split('\n-- ')[0]
+        except Exception as e:
+            logger.error(F"exception when trying to get rid of footer: {e}")
+            # logger.error(F"actual markdown: {self.markdown}")
 
 
     def image_renderer(self, part):
@@ -189,8 +219,9 @@ class ArticleRenderer():
         self.markdown    += F"[![icon]({icon_url})]({gallery_link})"
 def generate_index():
     blog=Blog()
-    blog.read_entries_from_imap()
-    # sys.exit(0)
+    blog.read_entries_from_imap(args.message, args.list_messages)
+    if args.list_messages:
+        sys.exit(0)
     for entry in blog.entries:
         renderer=ArticleRenderer(entry)
 
