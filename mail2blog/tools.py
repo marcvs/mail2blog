@@ -90,6 +90,7 @@ def render_pandoc_with_theme(inpt, title="Title", with_map=False, geolocation=Fa
         logger.debug(F"trying to write to {body_after_include_file}")
         with open(body_after_include_file, 'w') as tf:
             tf.write(geo_data)
+            tf.close()
             logger.debug(F"wrote to {body_after_include_file}")
     else:
         header_include_file      = CONFIG.get('themes', 'header_include_no_map', fallback      = None)
