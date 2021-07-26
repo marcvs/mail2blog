@@ -101,6 +101,7 @@ def render_pandoc_with_theme(inpt, title="Title", with_map=False, geolocation=Fa
             F'--include-in-header={header_include_file}',
             F'--include-before-body={body_before_include_file}',
             F'--include-after-body={body_after_include_file}']
+    logger.debug(F"pandoc args: {pandoc_args}")
     # header = F'title: {title}\n---\n'
 
     html_data = pypandoc.convert_text(inpt, 'html', format='md', extra_args=pandoc_args)
