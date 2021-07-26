@@ -97,7 +97,7 @@ class ArticleRenderer():
 
         # if self.gpx_data:
         if self.location:
-            html_data = tools.render_pandoc_with_theme(markdown_data, title=subject, with_geolocation=True)
+            html_data = tools.render_pandoc_with_theme(markdown_data, title=subject, geolocation=self.location)
         else:
             html_data = tools.render_pandoc_with_theme(markdown_data, title=subject)
 
@@ -148,7 +148,9 @@ class ArticleRenderer():
         if len (msg_body_parts) > 1: # we have some kind of header
             ## copy the header into the local class
             msg_internal_header = msg_body_parts[0]
+            logger.debug(F"internal header: {msg_internal_header}")
             parsed_header = tools.parse_internal_header(msg_internal_header)
+            logger.debug(F"parsed header: {parsed_header}")
             supported_metadata = ['location', 'title', 'author']
             for metadata_item in supported_metadata:
                 try:
