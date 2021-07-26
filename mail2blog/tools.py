@@ -14,6 +14,9 @@ import email
 from datetime import datetime
 import pypandoc
 from html.entities import codepoint2name
+import logging
+
+logger = logging.getLogger(__name__)
 
 from mail2blog.config import CONFIG
 
@@ -46,30 +49,47 @@ def dateparser(text):
     raise ValueError(F'no valid date format found: >>{text}<<')
 
 # >>Tue, 13 Jul 2021 10:52:08 +0200<<
-def render_pandoc_with_theme2(inpt, title="Title"):
+def render_pandoc_with_theme(inpt, title="Title", with_map=False, with_geolocation=False):
 
-    header_include = CONFIG.get('themes', 'header_include', fallback = None)
-    body_before_include   = CONFIG.get('themes', 'body_before_include', fallback   = None)
-    body_after_include   = CONFIG.get('themes', 'body_after_include', fallback   = None)
+    if with_geolocation:
+        header_include_file      = CONFIG.get('themes', 'header_include', fallback      = None)
+        body_after_include_file  = CONFIG.get('themes', 'body_after_include', fallback  = None)
+        body_before_include_file = CONFIG.get('themes', 'body_before_include', fallback = None)
+        # FIXME: dynamically create  body after include, by appending stuff like this:
+            # <div id="mapid"></div>
+            # <script>
+            # <!--map marker-->
+            # var circle = L.circle([63.508, 10.11], {
+            #     color: 'red',
+            #     fillColor: '#f03',
+            #     fillOpacity: 0.5,
+            #     radius: 5000
+            # }).addTo(mymap);
+            # <!--map marker end-->
+            # </script>
+    else:
+        header_include_file      = CONFIG.get('themes', 'header_include_no_map', fallback      = None)
+        body_after_include_file  = CONFIG.get('themes', 'body_after_include_no_map', fallback  = None)
+        body_before_include_file = CONFIG.get('themes', 'body_before_include_no_map', fallback = None)
 
     pandoc_args = ['-s', F'--metadata=title:{title}', 
-            F'--include-in-header={header_include}',
-            F'--include-before-body={body_before_include}',
-            F'--include-after-body={body_after_include}']
-    header = F'title: {title}\n---\n'
+            F'--include-in-header={header_include_file}',
+            F'--include-before-body={body_before_include_file}',
+            F'--include-after-body={body_after_include_file}']
+    # header = F'title: {title}\n---\n'
 
     html_data = pypandoc.convert_text(inpt, 'html', format='md', extra_args=pandoc_args)
     return html_data
-def render_pandoc_with_theme(inpt, title="Title"):
-    style_file_name = CONFIG.get('themes', 'style_file', fallback=None) 
-    with open(style_file_name, 'r') as st:
-        style = st.read()
-
-    pandoc_args = ['-s']
-    header = F'title: {title}\n---\n'
-
-    html_data = pypandoc.convert_text(style + inpt, 'html', format='md', extra_args=pandoc_args)
-    return html_data
+# def render_pandoc_with_theme(inpt, title="Title"):
+#     style_file_name = CONFIG.get('themes', 'style_file', fallback=None)
+#     with open(style_file_name, 'r') as st:
+#         style = st.read()
+#
+#     pandoc_args = ['-s']
+#     header = F'title: {title}\n---\n'
+#
+#     html_data = pypandoc.convert_text(style + inpt, 'html', format='md', extra_args=pandoc_args)
+#     return html_data
 
 def htmlescape(text):
     '''escape html characters'''
@@ -80,3 +100,17 @@ def htmlescape(text):
         if key in text:
             text = text.replace(key, value)
     return text
+
+def parse_internal_header(header):
+    retval={}
+    for line in header.split('\n'):
+        logger.debug(F"  header line: {line}")
+        try:
+            colonseparated = line.split(':')
+            key = colonseparated[0]
+            value = colonseparated[1:]
+            logger (F"   key: {key} value: {value}")
+        except Exception as e:
+            logger.warning(F"Trouble when parsing header: {e}")
+        retval[key] = value 
+    return retval
