@@ -40,6 +40,8 @@ def parseOptions():
     parser.add_argument('--loglevel'        ,default=os.environ.get("LOG", None)
                                             ,help='Debugging Level')
 
+    parser.add_argument('--message',  '-m'  ,default=None, type=int)
+    parser.add_argument('--list-messages',  '-lm'  ,default=False, action="store_true")
     parser.add_argument('--debug',    '-d'  ,default=False, action="store_true")
     parser.add_argument('--verbose',  '-v'  ,default=False, action="store_true")
     parser.add_argument('--nopix',           default=False, action="store_true")
