@@ -49,52 +49,85 @@ def dateparser(text):
     raise ValueError(F'no valid date format found: >>{text}<<')
 
 # >>Tue, 13 Jul 2021 10:52:08 +0200<<
-def render_pandoc_with_theme(inpt, title="Title", with_map=False, geolocation=False):
+def render_pandoc_with_geolocation (inpt, title="Title", gpx_data=False, geolocation=False):
+    temp_dir                 = CONFIG.get('locations', 'temp_output', fallback      = '/tmp')
+    header_include_file      = CONFIG.get('themes', 'header_include', fallback      = None)
+    # body_after_include_file  = CONFIG.get('themes', 'body_after_include', fallback  = None)
+    body_after_include_file  = os.path.join(temp_dir, 'geo.tmp')
+    body_before_include_file = CONFIG.get('themes', 'body_before_include', fallback  = None)
+    geo_data = F'''
+        </article>
 
-    if geolocation:
-        temp_dir                 = CONFIG.get('locations', 'temp_output', fallback      = '/tmp')
-        header_include_file      = CONFIG.get('themes', 'header_include', fallback      = None)
-        # body_after_include_file  = CONFIG.get('themes', 'body_after_include', fallback  = None)
-        body_after_include_file  = os.path.join(temp_dir, 'geo.tmp')
-        body_before_include_file = CONFIG.get('themes', 'body_before_include', fallback  = None)
+        <script>
+            var mymap = L.map('mapid').setView([67.00, 9.49], 4);
+            L.tileLayer('https://api.mapbox.com/styles/v1/{{id}}/tiles/{{z}}/{{x}}/{{y}}?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {{
+                maxZoom: 18,
+                attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, ' +
+                    'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+                id: 'mapbox/streets-v11',
+                tileSize: 512,
+                zoomOffset: -1
+            }}).addTo(mymap);
+        </script>'''
 
-        # geo:
+    if geolocation: 
         logger.debug(F"got geolocation: {geolocation}")
         lat = geolocation[0]
         lon = geolocation[1]
-        geo_data = F'''
-            </article>
-
+        geo_data += F'''
             <script>
-                var mymap = L.map('mapid').setView([67.00, 9.49], 4);
-                L.tileLayer('https://api.mapbox.com/styles/v1/{{id}}/tiles/{{z}}/{{x}}/{{y}}?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {{
-                    maxZoom: 18,
-                    attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, ' +
-                        'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
-                    id: 'mapbox/streets-v11',
-                    tileSize: 512,
-                    zoomOffset: -1
-                }}).addTo(mymap);
-            </script>
-
-            <script>
-            <!--map marker-->
-            var circle = L.circle([{lat}, {lon}], {{
-                color: 'red',
-                fillColor: '#f03',
-                fillOpacity: 0.5,
-                radius: 100
-            }}).addTo(mymap);
-            <!--map marker end-->
+            <!--geolocation-->
+            var marker = L.marker([{lat}, {lon}]).addTo(mymap);
+            <!--geolocation-->
             </script>'''
-        logger.debug(F"trying to write to {body_after_include_file}")
-        with open(body_after_include_file, 'w') as tf:
-            tf.write(geo_data)
-            logger.debug(F"wrote to {body_after_include_file}")
-    else:
-        header_include_file      = CONFIG.get('themes', 'header_include_no_map', fallback      = None)
-        body_after_include_file  = CONFIG.get('themes', 'body_after_include_no_map', fallback  = None)
-        body_before_include_file = CONFIG.get('themes', 'body_before_include_no_map', fallback = None)
+        # geo_data += F'''
+        #     <script>
+        #     <!--geolocation-->
+        #     var circle = L.circle([{lat}, {lon}], {{
+        #         color: 'red',
+        #         fillColor: '#f03',
+        #         fillOpacity: 0.5,
+        #         radius: 100
+        #     }}).addTo(mymap);
+        #     <!--geolocation-->
+        #     </script>'''
+    if gpx_data: 
+        logger.debug(F"got gpx_data")
+
+        geo_data += '''
+            <script>
+            <!--gpx_data-->
+            var latlngs = [
+            '''
+        is_first = True
+        for track in gpx_data.tracks:
+            for segment in track.segments:
+                # print("new segment")
+                for point in segment.points:
+                    if not is_first:
+                        geo_data += ",\n"
+                    if is_first:
+                        is_first=False
+                    geo_data += F"[{point.latitude}, {point.longitude}]"
+
+        geo_data += '''
+            ];
+            var polyline = L.polyline(latlngs, {color: 'red'}).addTo(mymap);
+            <!--gpx_data-->
+            </script>
+            '''
+                # var latlngs = [
+                #     [45.51, -122.68],
+                #     [37.77, -122.43],
+                #     [34.04, -118.2]
+                # ];
+                #
+                # var polyline = L.polyline(latlngs, {color: 'red'}).addTo(map);
+
+    logger.debug(F"Writing to {body_after_include_file}")
+    with open(body_after_include_file, 'w') as tf:
+        tf.write(geo_data)
+        logger.debug(F"wrote to {body_after_include_file}")
 
     pandoc_args = ['-s', F'--metadata=title:{title}', 
             F'--include-in-header={header_include_file}',
@@ -102,19 +135,25 @@ def render_pandoc_with_theme(inpt, title="Title", with_map=False, geolocation=Fa
             F'--include-after-body={body_after_include_file}']
     logger.debug(F"pandoc args: {pandoc_args}")
     # header = F'title: {title}\n---\n'
-
     html_data = pypandoc.convert_text(inpt, 'html', format='md', extra_args=pandoc_args)
     return html_data
-# def render_pandoc_with_theme(inpt, title="Title"):
-#     style_file_name = CONFIG.get('themes', 'style_file', fallback=None)
-#     with open(style_file_name, 'r') as st:
-#         style = st.read()
-#
-#     pandoc_args = ['-s']
-#     header = F'title: {title}\n---\n'
-#
-#     html_data = pypandoc.convert_text(style + inpt, 'html', format='md', extra_args=pandoc_args)
-#     return html_data
+
+def render_pandoc_with_theme(inpt, title="Title", gpx_data=False, geolocation=False):
+    if geolocation or gpx_data:
+        return render_pandoc_with_geolocation(inpt, title, gpx_data, geolocation)
+
+    header_include_file      = CONFIG.get('themes', 'header_include_no_map', fallback      = None)
+    body_after_include_file  = CONFIG.get('themes', 'body_after_include_no_map', fallback  = None)
+    body_before_include_file = CONFIG.get('themes', 'body_before_include_no_map', fallback = None)
+
+    pandoc_args = ['-s', F'--metadata=title:{title}', 
+            F'--include-in-header={header_include_file}',
+            F'--include-before-body={body_before_include_file}',
+            F'--include-after-body={body_after_include_file}']
+    logger.debug(F"pandoc args: {pandoc_args}")
+    # header = F'title: {title}\n---\n'
+    html_data = pypandoc.convert_text(inpt, 'html', format='md', extra_args=pandoc_args)
+    return html_data
 
 def htmlescape(text):
     '''escape html characters'''
