@@ -57,7 +57,7 @@ if args.input is None:
     print("Error: must use --in or -i to specify input file")
     sys.exit(1)
 if args.output is None:
-    args.output = os.path.splitext(args.input)[0] + '-reduced' + ospath.splitext(args.input)[1]
+    args.output = os.path.splitext(args.input)[0] + '-reduced' + os.path.splitext(args.input)[1]
 
 gpx_file = open(args.input, 'r')
 r_gpx_file = open(args.output, 'w')
