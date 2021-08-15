@@ -43,7 +43,8 @@ def email_decode(value):
 def dateparser(text):
     for fmt in ('%a, %d %b %Y %H:%M:%S %z', '%m/%d/%y %H:%M', '%m/%d/%Y %H:%M', '%Y-%m-%dT%H:%M:%S', '%Y-%m-%d %H:%M:%S'):
         try:
-            return datetime.strptime(text, fmt)
+            # epoch = date.timestamp()
+            return datetime.strptime(text, fmt).timestamp()
         except ValueError:
             pass
     raise ValueError(F'no valid date format found: >>{text}<<')

@@ -200,8 +200,7 @@ class Blog:
             if list_messages:
                 print(F"{i:2}| {dec_msg['message-id'][0:30]:30} | {str(dec_msg['from']):34} | {str(dec_msg['to']):23} |  {dec_msg['subject']}")
 
-            date = tools.dateparser(msg['date'])
-            epoch = date.timestamp()
+            epoch = tools.dateparser(msg['date'])
             self.entries.append(Blog_entry(message_id = dec_msg['message-id'],
                                            email_from = dec_msg['from'], 
                                            subject = dec_msg['subject'],
