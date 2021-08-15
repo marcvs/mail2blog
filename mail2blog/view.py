@@ -227,6 +227,7 @@ class ArticleRenderer():
         gallery_link      = F"{gallery_link_base}/{self.gallery_name}"
         icon_url          = F"{gallery_link_base}/{self.gallery_name}/gallery/thumbs/{self.gallery_icon_basename}"
         self.markdown    += F"[![icon]({icon_url})]({gallery_link})"
+
 def generate_index():
     blog=Blog()
     blog.read_entries_from_imap(args.message, args.list_messages)
@@ -235,10 +236,11 @@ def generate_index():
     for entry in blog.entries:
         renderer=ArticleRenderer(entry)
 
-    blog_index_md = blog.generate_index()
-
+    # blog_index_md   = blog.generate_index()
+    blog_index_md   = blog.generate_index_new()
     blog_index_html = tools.render_pandoc_with_theme(blog_index_md, title="Nordkapp Tour 2021")
     index_file_name = CONFIG.get('locations', 'blog_output') + "/index.html"
+
 
     tools.makepath(CONFIG.get('locations', 'blog_output'))
     with open(index_file_name, 'w') as fh:
