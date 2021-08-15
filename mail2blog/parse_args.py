@@ -20,15 +20,15 @@ def parseOptions():
     # print (F"basename: {basename}")
     basename="mail2blog"
 
-    config_dir  = os.environ['HOME']+F'/.config/{basename}'
+    # config_dir  = os.environ['HOME']+F'/.config/{basename}'
     config_file = os.environ['HOME']+F'/.config/{basename}.conf'
     db          = os.environ['HOME']+F'/.cache/{basename}.db'
     # log_file    = os.environ['HOME']+F'/.cache/{basename}.log'
     log_file    = folder_of_executable+F'/{basename}.log'
     log_file    = ''
 
-    if not os.path.exists(config_dir):
-        os.mkdir(config_dir)
+    # if not os.path.exists(config_dir):
+    #     os.mkdir(config_dir)
 
     parser = argparse.ArgumentParser(description='''mail2blog''')
     parser.add_argument('--basename'        ,default=basename)
