@@ -194,15 +194,11 @@ class Blog:
         if index is not None:
             msg_list = [msg_list[index]]
 
-        for msg in reversed(msg_list):
-            # Decode as much as possible
-            FIELDS = ['from', 'to', 'subject', 'date', 'Message-ID', 'Return-Path', 'Content-Type']
-            dec_msg = {}
-            for field in FIELDS:
-                dec_msg[field] = tools.email_decode(msg[field])
-            dec_msg['message-id']=msg['message-id'].replace('<','').replace('>','')
+        for i in range(len(msg_list)-1, -1, -1):
+            msg=msg_list[i]
+            dec_msg = decode_message (msg)
             if list_messages:
-                print(F"{dec_msg['message-id']} | {dec_msg['from']} | {dec_msg['to']} |  {dec_msg['subject']}")
+                print(F"{i:2}| {dec_msg['message-id'][0:30]:30} | {str(dec_msg['from']):34} | {str(dec_msg['to']):23} |  {dec_msg['subject']}")
                 # print(F"structure:\n  {_structure(msg)}")
 
             date = tools.dateparser(msg['date'])
@@ -212,3 +208,11 @@ class Blog:
                                            subject = dec_msg['subject'],
                                            epoch=epoch,
                                            source="imap"))
+def decode_message(msg):
+    '''Decode as much as possible'''
+    FIELDS = ['from', 'to', 'subject', 'date', 'Message-ID', 'Return-Path', 'Content-Type']
+    dec_msg = {}
+    for field in FIELDS:
+        dec_msg[field] = tools.email_decode(msg[field])
+    dec_msg['message-id']=msg['message-id'].replace('<','').replace('>','')
+    return dec_msg
