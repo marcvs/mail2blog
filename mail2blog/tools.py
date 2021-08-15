@@ -178,3 +178,12 @@ def parse_internal_header(header):
             logger.warning(F"Trouble when parsing header: {e}")
         retval[key] = values 
     return retval
+
+def decode_message(msg):
+    '''Decode as much as possible'''
+    FIELDS = ['from', 'to', 'subject', 'date', 'Message-ID', 'Return-Path', 'Content-Type']
+    dec_msg = {}
+    for field in FIELDS:
+        dec_msg[field] = email_decode(msg[field])
+    dec_msg['message-id']=msg['message-id'].replace('<','').replace('>','')
+    return dec_msg
