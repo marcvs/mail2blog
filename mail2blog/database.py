@@ -195,11 +195,10 @@ class Blog:
             msg_list = [msg_list[index]]
 
         for i in range(len(msg_list)-1, -1, -1):
-            msg=msg_list[i]
+            msg = msg_list[i]
             dec_msg = tools.decode_message(msg)
             if list_messages:
                 print(F"{i:2}| {dec_msg['message-id'][0:30]:30} | {str(dec_msg['from']):34} | {str(dec_msg['to']):23} |  {dec_msg['subject']}")
-                # print(F"structure:\n  {_structure(msg)}")
 
             date = tools.dateparser(msg['date'])
             epoch = date.timestamp()

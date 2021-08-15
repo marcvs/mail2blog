@@ -118,7 +118,7 @@ class ArticleRenderer():
         return None
 
     def text_renderer(self, part):
-        payload = part.get_payload(decode=True)
+        payload  = part.get_payload(decode=True)
         try:
             # [2021-07-20 22:30:25,917] { ...il2blog/database.py:83 }    INFO - loading message delme...
             # [2021-07-20 22:30:26,165] { ..../mail2blog/view.py:116}    INFO - content_maintype: text
@@ -127,6 +127,8 @@ class ArticleRenderer():
             logger.info(F"content_maintype: {maintype}")
             subtype = part.get_content_subtype()
             logger.info(F"content_subtype: {subtype}")
+            charset  = part.get_content_charset()
+            logger.info(F"content_charset: {charset}")
         except Exception:
             pass
 
@@ -143,8 +145,7 @@ class ArticleRenderer():
                 return None
 
         # Handle text body:
-        # FIXME: try to find encoding from email
-        self.markdown = payload.decode('iso-8859-1')
+        self.markdown = payload.decode(charset)
 
         ## try to split off a potential header
         msg_body_parts = self.markdown.split('\n---')
@@ -199,7 +200,9 @@ class ArticleRenderer():
 
     def walker(self):
         for part in self.msg.walk():
-            maintype =  part.get_content_maintype()
+            # print (F"message part: {part}")
+            # charset  = part.get_content_charset()
+            maintype = part.get_content_maintype()
             self.render(maintype, part)
 
     def _run_bic(self):
