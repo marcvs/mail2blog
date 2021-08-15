@@ -141,6 +141,8 @@ class Blog_entry:
         return (cls(json['message_id'], json['email_from'], json['subject'], json['date']))
 
     def __str__(self):
+        '''this is so wrong!!! Don't use the index template for each individual entry of the index!
+        Rather return the entry and render the index from above!'''
         template_file = CONFIG.get('templates', 'index')
         with open(template_file, 'r') as fh:
             template_data = fh.read()
@@ -155,18 +157,41 @@ class Blog_entry:
                                 link = F"{subject_no_spaces}-{self.message_id}.html")
         logger.debug(F"subject_no_spaces: {subject_no_spaces}")
         return retval
+    def __dict__(self):
+        retval={}
+        retval['author'] = self.author
+        retval['subject'] = self.subject.__str__()
+        retval['date'] = self.date.__str__()
+        subject_no_spaces = self.get_subject(replace_spaces=True)
+        retval['link'] = F"{subject_no_spaces}-{self.message_id}.html"
+        return retval
 
 class Blog:
     '''Class to have all blog entries'''
     def __init__(self):
         self.entries = []
         # self.read_entries_from_db()
+    def generate_index_new(self):
+        '''render the index'''
+
+        # collect data
+        blog_entry_data = []
+        for entry in self.entries:
+            blog_entry_data.append(entry.__dict__())
+
+        template_file     = CONFIG.get('templates', 'index_new')
+        with open(template_file, 'r') as fh:
+            template_data = fh.read()
+        template = Template(template_data)
+        markdown_data = template.render(article_list=blog_entry_data)
+
+        return(markdown_data)
+
     def generate_index(self):
         '''render the index'''
         rendered_blog_entries= []
         for entry in self.entries:
             rendered_blog_entries.append(entry.__str__())
-
         return "\n".join(rendered_blog_entries)
 
     def read_entries_from_db(self):
