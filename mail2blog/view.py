@@ -17,6 +17,9 @@ import re
 import subprocess
 from jinja2 import Template
 
+import gpxpy
+import gpxpy.gpx
+
 from mail2blog import logsetup
 from mail2blog import tools 
 from mail2blog.parse_args import args
@@ -32,7 +35,7 @@ class ArticleRenderer():
         self.message_id       = blog_entry.get_message_id()
         self.subject          = blog_entry.get_subject(replace_spaces=True)
         self.media_part_found = False
-        self.location      = None
+        self.location         = None
         self.gpx_data         = None
 
         # Define locations
@@ -96,10 +99,9 @@ class ArticleRenderer():
                                 link = F"{subject_no_spaces}-{self.message_id}.html")
 
         # if self.gpx_data:
-        if self.location:
-            html_data = tools.render_pandoc_with_theme(markdown_data, title=subject, geolocation=self.location)
-        else:
-            html_data = tools.render_pandoc_with_theme(markdown_data, title=subject)
+        html_data = tools.render_pandoc_with_theme(markdown_data, title=subject,
+                geolocation=self.location,
+                gpx_data = self.gpx_data)
 
         logger.debug(F"saving html to {self.html_output_file}")
         with open(self.html_output_file, 'w') as fp:
@@ -135,9 +137,12 @@ class ArticleRenderer():
             extension = os.path.splitext(filename)[1] 
             logger.debug(F"extension: {extension}")
             if extension == ".gpx":
-                self.gpx_data = payload.decode('iso-8859-1')
-                logger.debug("fine; returning none")
+                temp = payload.decode('iso-8859-1')
+                self.gpx_data = gpxpy.parse(temp)
+                logger.debug("fine; stored gpx data")
                 return None
+
+        # Handle text body:
         # FIXME: try to find encoding from email
         self.markdown = payload.decode('iso-8859-1')
 
