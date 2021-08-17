@@ -53,7 +53,8 @@ class Blog_entry:
         if epoch is None:
             self.epoch  = int(time.time())
 
-        self.date = datetime.fromtimestamp(epoch)
+        tmp = time.gmtime(self.epoch)
+        self.date = time.strftime('%a %d.%m. %y', tmp)
         self.author = str(email_from).split('<')[0]
         self.author_email = str(email_from).split('<')[1].replace('>','')
         
