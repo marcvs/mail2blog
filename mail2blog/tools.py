@@ -32,6 +32,7 @@ def makepath(directory, depth=3):
         # logger.debug(F"making: {path}")
         try:
             os.mkdir(path)
+            os.chmod(path, 0o755)
         except FileExistsError as e:
             # logger.warning(F"Cannot create directory: {e}")
             pass
