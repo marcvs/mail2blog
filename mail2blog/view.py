@@ -238,7 +238,8 @@ def generate_index():
 
     # blog_index_md   = blog.generate_index()
     blog_index_md   = blog.generate_index_new()
-    blog_index_html = tools.render_pandoc_with_theme(blog_index_md, title="Nordkapp Tour 2021")
+    blog_title = CONFIG.get('main', 'title', fallback='Blog')
+    blog_index_html = tools.render_pandoc_with_theme(blog_index_md, title=blog_title)
     index_file_name = CONFIG.get('locations', 'blog_output') + "/index.html"
 
 
