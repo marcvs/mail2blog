@@ -70,7 +70,7 @@ def render_pandoc_with_geolocation(
     body_before_include_file = CONFIG.get(
         "themes", "body_before_include", fallback=None
     )
-    map_view= CONFIG.get("locations", "map_view", fallback="[45.00, 9.49], 7")
+    map_view= CONFIG.get("map", "map_view", fallback="[45.00, 9.49], 7")
     geo_data = f"""
         </article>
 
