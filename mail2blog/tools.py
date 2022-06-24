@@ -62,20 +62,20 @@ def dateparser(text):
 
 # >>Tue, 13 Jul 2021 10:52:08 +0200<<
 def render_pandoc_with_geolocation(
-    inpt, title="Title", gpx_data=False, geolocation=False
+        inpt, title="Title", gpx_data: dict = {}, geolocation: list = []
 ):
     temp_dir = CONFIG.get("locations", "temp_output", fallback="/tmp")
     header_include_file = CONFIG.get("themes", "header_include", fallback=None)
-    # body_after_include_file  = CONFIG.get('themes', 'body_after_include', fallback  = None)
     body_after_include_file = os.path.join(temp_dir, "geo.tmp")
     body_before_include_file = CONFIG.get(
         "themes", "body_before_include", fallback=None
     )
+    map_view= CONFIG.get("locations", "temp_output", fallback="[45.00, 9.49], 7")
     geo_data = f"""
         </article>
 
         <script>
-            var mymap = L.map('mapid').setView([45.00, 9.49], 7);
+            var mymap = L.map('mapid').setView({map_view});
             L.tileLayer('https://api.mapbox.com/styles/v1/{{id}}/tiles/{{z}}/{{x}}/{{y}}?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {{
                 maxZoom: 18,
                 attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, ' +
@@ -207,9 +207,9 @@ def parse_internal_header(header):
             key = colonseparated[0]
             values = [v.rstrip().lstrip() for v in colonseparated[1:]]
             logger.debug(f"           key: {key} -- {values}")
+            retval[key] = values
         except Exception as e:
             logger.warning(f"Trouble when parsing header: {e}")
-        retval[key] = values
     return retval
 
 
