@@ -20,15 +20,16 @@ logger = logging.getLogger(__name__)
 
 from mail2blog.config import CONFIG
 
+
 def makepath(directory, depth=3):
-    basepath = '/'.join(directory.split('/')[0:-depth])
-    snippets = directory.split('/')[-depth:]
+    basepath = "/".join(directory.split("/")[0:-depth])
+    snippets = directory.split("/")[-depth:]
 
     paths = []
     for i in range(0, len(snippets)):
-        paths.append(basepath +'/'+'/'.join(snippets[0:i+1]))
+        paths.append(basepath + "/" + "/".join(snippets[0 : i + 1]))
 
-    for path in paths: 
+    for path in paths:
         # logger.debug(F"making: {path}")
         try:
             os.mkdir(path)
@@ -37,27 +38,40 @@ def makepath(directory, depth=3):
             # logger.warning(F"Cannot create directory: {e}")
             pass
 
+
 def email_decode(value):
-    '''Decode email encoding'''
+    """Decode email encoding"""
     return email.header.make_header(email.header.decode_header(value))
 
+
 def dateparser(text):
-    for fmt in ('%a, %d %b %Y %H:%M:%S %z', '%m/%d/%y %H:%M', '%m/%d/%Y %H:%M', '%Y-%m-%dT%H:%M:%S', '%Y-%m-%d %H:%M:%S'):
+    for fmt in (
+        "%a, %d %b %Y %H:%M:%S %z",
+        "%m/%d/%y %H:%M",
+        "%m/%d/%Y %H:%M",
+        "%Y-%m-%dT%H:%M:%S",
+        "%Y-%m-%d %H:%M:%S",
+    ):
         try:
             # epoch = date.timestamp()
             return datetime.strptime(text, fmt).timestamp()
         except ValueError:
             pass
-    raise ValueError(F'no valid date format found: >>{text}<<')
+    raise ValueError(f"no valid date format found: >>{text}<<")
+
 
 # >>Tue, 13 Jul 2021 10:52:08 +0200<<
-def render_pandoc_with_geolocation (inpt, title="Title", gpx_data=False, geolocation=False):
-    temp_dir                 = CONFIG.get('locations', 'temp_output', fallback      = '/tmp')
-    header_include_file      = CONFIG.get('themes', 'header_include', fallback      = None)
+def render_pandoc_with_geolocation(
+    inpt, title="Title", gpx_data=False, geolocation=False
+):
+    temp_dir = CONFIG.get("locations", "temp_output", fallback="/tmp")
+    header_include_file = CONFIG.get("themes", "header_include", fallback=None)
     # body_after_include_file  = CONFIG.get('themes', 'body_after_include', fallback  = None)
-    body_after_include_file  = os.path.join(temp_dir, 'geo.tmp')
-    body_before_include_file = CONFIG.get('themes', 'body_before_include', fallback  = None)
-    geo_data = F'''
+    body_after_include_file = os.path.join(temp_dir, "geo.tmp")
+    body_before_include_file = CONFIG.get(
+        "themes", "body_before_include", fallback=None
+    )
+    geo_data = f"""
         </article>
 
         <script>
@@ -70,18 +84,18 @@ def render_pandoc_with_geolocation (inpt, title="Title", gpx_data=False, geoloca
                 tileSize: 512,
                 zoomOffset: -1
             }}).addTo(mymap);
-        </script>'''
+        </script>"""
 
-    if geolocation: 
-        logger.debug(F"got geolocation: {geolocation}")
+    if geolocation:
+        logger.debug(f"got geolocation: {geolocation}")
         lat = geolocation[0]
         lon = geolocation[1]
-        geo_data += F'''
+        geo_data += f"""
             <script>
             <!--geolocation-->
             var marker = L.marker([{lat}, {lon}]).addTo(mymap);
             <!--geolocation-->
-            </script>'''
+            </script>"""
         # geo_data += F'''
         #     <script>
         #     <!--geolocation-->
@@ -93,14 +107,14 @@ def render_pandoc_with_geolocation (inpt, title="Title", gpx_data=False, geoloca
         #     }}).addTo(mymap);
         #     <!--geolocation-->
         #     </script>'''
-    if gpx_data: 
-        logger.debug(F"got gpx_data")
+    if gpx_data:
+        logger.debug(f"got gpx_data")
 
-        geo_data += '''
+        geo_data += """
             <script>
             <!--gpx_data-->
             var latlngs = [
-            '''
+            """
         is_first = True
         for track in gpx_data.tracks:
             for segment in track.segments:
@@ -109,83 +123,109 @@ def render_pandoc_with_geolocation (inpt, title="Title", gpx_data=False, geoloca
                     if not is_first:
                         geo_data += ",\n"
                     if is_first:
-                        is_first=False
-                    geo_data += F"[{point.latitude}, {point.longitude}]"
+                        is_first = False
+                    geo_data += f"[{point.latitude}, {point.longitude}]"
 
-        geo_data += '''
+        geo_data += """
             ];
             var polyline = L.polyline(latlngs, {color: 'red'}).addTo(mymap);
             <!--gpx_data-->
             </script>
-            '''
-                # var latlngs = [
-                #     [45.51, -122.68],
-                #     [37.77, -122.43],
-                #     [34.04, -118.2]
-                # ];
-                #
-                # var polyline = L.polyline(latlngs, {color: 'red'}).addTo(map);
+            """
+        # var latlngs = [
+        #     [45.51, -122.68],
+        #     [37.77, -122.43],
+        #     [34.04, -118.2]
+        # ];
+        #
+        # var polyline = L.polyline(latlngs, {color: 'red'}).addTo(map);
 
-    logger.debug(F"Writing to {body_after_include_file}")
-    with open(body_after_include_file, 'w') as tf:
+    logger.debug(f"Writing to {body_after_include_file}")
+    with open(body_after_include_file, "w") as tf:
         tf.write(geo_data)
-        logger.debug(F"wrote to {body_after_include_file}")
+        logger.debug(f"wrote to {body_after_include_file}")
 
-    pandoc_args = ['-s', F'--metadata=title:{title}', 
-            F'--include-in-header={header_include_file}',
-            F'--include-before-body={body_before_include_file}',
-            F'--include-after-body={body_after_include_file}']
-    logger.debug(F"pandoc args: {pandoc_args}")
+    pandoc_args = [
+        "-s",
+        f"--metadata=title:{title}",
+        f"--include-in-header={header_include_file}",
+        f"--include-before-body={body_before_include_file}",
+        f"--include-after-body={body_after_include_file}",
+    ]
+    logger.debug(f"pandoc args: {pandoc_args}")
     # header = F'title: {title}\n---\n'
-    html_data = pypandoc.convert_text(inpt, 'html', format='md', extra_args=pandoc_args)
+    html_data = pypandoc.convert_text(inpt, "html", format="md", extra_args=pandoc_args)
     return html_data
+
 
 def render_pandoc_with_theme(inpt, title="Title", gpx_data=False, geolocation=False):
     if geolocation or gpx_data:
         return render_pandoc_with_geolocation(inpt, title, gpx_data, geolocation)
 
-    header_include_file      = CONFIG.get('themes', 'header_include_no_map', fallback      = None)
-    body_after_include_file  = CONFIG.get('themes', 'body_after_include_no_map', fallback  = None)
-    body_before_include_file = CONFIG.get('themes', 'body_before_include_no_map', fallback = None)
+    header_include_file = CONFIG.get("themes", "header_include_no_map", fallback=None)
+    body_after_include_file = CONFIG.get(
+        "themes", "body_after_include_no_map", fallback=None
+    )
+    body_before_include_file = CONFIG.get(
+        "themes", "body_before_include_no_map", fallback=None
+    )
 
-    pandoc_args = ['-s', F'--metadata=title:{title}', 
-            F'--include-in-header={header_include_file}',
-            F'--include-before-body={body_before_include_file}',
-            F'--include-after-body={body_after_include_file}']
-    logger.debug(F"pandoc args: {pandoc_args}")
+    pandoc_args = [
+        "-s",
+        f"--metadata=title:{title}",
+        f"--include-in-header={header_include_file}",
+        f"--include-before-body={body_before_include_file}",
+        f"--include-after-body={body_after_include_file}",
+    ]
+    logger.debug(f"pandoc args: {pandoc_args}")
     # header = F'title: {title}\n---\n'
-    html_data = pypandoc.convert_text(inpt, 'html', format='md', extra_args=pandoc_args)
+    html_data = pypandoc.convert_text(inpt, "html", format="md", extra_args=pandoc_args)
     return html_data
 
+
 def htmlescape(text):
-    '''escape html characters'''
-    d = dict((chr(code), u'&%s;' % name) for code,name in codepoint2name.items() if code!=38) # exclude "&"    
-    if u"&" in text:
-        text = text.replace(u"&", u"&amp;")
+    """escape html characters"""
+    d = dict(
+        (chr(code), "&%s;" % name)
+        for code, name in codepoint2name.items()
+        if code != 38
+    )  # exclude "&"
+    if "&" in text:
+        text = text.replace("&", "&amp;")
     for key, value in d.items():
         if key in text:
             text = text.replace(key, value)
     return text
 
+
 def parse_internal_header(header):
-    retval={}
-    for line in header.split('\n'):
-        logger.debug(F"  header line: {line}")
+    retval = {}
+    for line in header.split("\n"):
+        logger.debug(f"  header line: {line}")
         try:
-            colonseparated = line.split(':')
+            colonseparated = line.split(":")
             key = colonseparated[0]
             values = [v.rstrip().lstrip() for v in colonseparated[1:]]
-            logger.debug (F"           key: {key} -- {values}")
+            logger.debug(f"           key: {key} -- {values}")
         except Exception as e:
-            logger.warning(F"Trouble when parsing header: {e}")
-        retval[key] = values 
+            logger.warning(f"Trouble when parsing header: {e}")
+        retval[key] = values
     return retval
 
+
 def decode_message(msg):
-    '''Decode as much as possible'''
-    FIELDS = ['from', 'to', 'subject', 'date', 'Message-ID', 'Return-Path', 'Content-Type']
+    """Decode as much as possible"""
+    FIELDS = [
+        "from",
+        "to",
+        "subject",
+        "date",
+        "Message-ID",
+        "Return-Path",
+        "Content-Type",
+    ]
     dec_msg = {}
     for field in FIELDS:
         dec_msg[field] = email_decode(msg[field])
-    dec_msg['message-id']=msg['message-id'].replace('<','').replace('>','')
+    dec_msg["message-id"] = msg["message-id"].replace("<", "").replace(">", "")
     return dec_msg
