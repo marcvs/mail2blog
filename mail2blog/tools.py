@@ -30,7 +30,7 @@ def makepath(directory, depth=3):
         paths.append(basepath + "/" + "/".join(snippets[0 : i + 1]))
 
     for path in paths:
-        # logger.debug(F"making: {path}")
+        logger.debug(F"making: {path}")
         try:
             os.mkdir(path)
             os.chmod(path, 0o755)
