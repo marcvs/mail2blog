@@ -104,6 +104,7 @@ class ArticleRenderer():
                 gpx_data = self.gpx_data)
 
         logger.debug(F"saving html to {self.html_output_file}")
+        logger.debug(F"saving html to {os.path.dirname(self.html_output_file)}")
         tools.makepath(os.path.dirname(self.html_output_file),4)
         with open(self.html_output_file, 'w') as fp:
             fp.write(html_data)
