@@ -176,7 +176,7 @@ class ArticleRenderer():
 
     def image_renderer(self, part):
         JPEG_EXTENSIONS=['JPG', 'JPEG', 'Jpeg', 'jpeg']
-        tools.makepath(self.media_output_dir, 2)
+        tools.makepath(self.media_output_dir, 3)
         temp = part.get_filename()
         filename = re.sub(r"[\s+/]", '-', temp)
         for ext in JPEG_EXTENSIONS:
